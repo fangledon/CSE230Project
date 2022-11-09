@@ -79,6 +79,9 @@ data Combination = RoyalFlush Suit
                 | Pairs [Card] [Card] Card -- First Pair, Second Pair, Remain
                 | Pair [Card] [Card] -- Pair, Remain
                 | High [Card]
+                
+cardsOf :: Combination -> [Card]
+-- Return the 5 cards of a combination. Return value is undefined if the combination is invalid
 
 combination :: Game -> Player -> Combination
 -- Return the (best) combination the player achieves.
