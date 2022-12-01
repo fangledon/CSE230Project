@@ -91,3 +91,7 @@ combination :: Game -> Player -> Combination
 isBest :: Game -> Player -> Bool
 -- Return whether the player has the best combination of the round.
 -- Note that the best player does not necessarily take all the pot.
+
+canContinue :: Game -> Bool
+-- Return whether everyone has enough money (>= big blind) to continue into the next round
+-- The only case when isTurn anyone = False and isNextPhaseReady = False is when canContinue = False
