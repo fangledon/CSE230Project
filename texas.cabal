@@ -1,6 +1,7 @@
 cabal-version:      2.4
 name:               texas
-version:            0.0.0.1
+version:            0.0.1.0
+build-type:         Simple
 
 -- A short (one-line) description of the package.
 -- synopsis:
@@ -23,14 +24,24 @@ extra-source-files:
     CHANGELOG.md
     README.md
 
-executable texas
-    main-is:          Main.hs
+Library
+    ghc-options:        -W -fdefer-typed-holes
+    exposed-modules:    Texas.Driver.Entry
+    -- other-modules:
+    build-depends:      base
+    hs-source-dirs:     src
+    default-language:   Haskell2010
+    Default-Extensions: OverloadedStrings
+
+executable client
+    main-is:            Main.hs
 
     -- Modules included in this executable, other than Main.
-    -- other-modules:
+    other-modules:      Texas.Driver.Entry
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
-    build-depends:    base ^>=4.14.3.0
-    hs-source-dirs:   app
-    default-language: Haskell2010
+    build-depends:      base ^>=4.14.3.0,
+                        texas
+    hs-source-dirs:     src
+    default-language:   Haskell2010
