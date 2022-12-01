@@ -2,3 +2,5 @@ dist-newstyle
 cabal.project.local
 *~
 .DS_Store
+.stack-work
+stack.yaml.lock
