@@ -5,8 +5,11 @@
 data Suit = Heart | Spade | Diamond | Club 
     deriving Eq
 
-data Rank = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | J | Q | K | A
+data Rank = {-private-}
     deriving (Eq, Ord, Enum)
+
+rk :: {-1~13 or J Q K A-} -> Rank -- smart constructor for rank
+-- Note: rk 2 is the minimal rank and rk A is the maximal
 
 data Card = {-private-}
     deriving (Eq, Ord)
