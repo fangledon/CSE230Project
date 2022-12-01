@@ -1,7 +1,8 @@
 {-# LANGUAGE InstanceSigs #-}
 module Texas.Backend.Combination where
 import Texas.Backend.Card 
-import Data.List (sort)
+import Data.List (sort, sortBy, foldl')
+import Control.Monad.Except
 
 data CombType = THigh | TPair | TPairs | TThree | TStraight | TFlush | THouse | TFour | TStraightFlush | TRoyalFlush
     deriving (Eq, Bounded, Enum, Ord, Show)
@@ -18,6 +19,10 @@ data Combination = RoyalFlush Suit
                  | High [Card]
     deriving (Eq,Show)
 
+badComb = High []
+-- >>> compare badComb $ High []
+-- GT
+
 combType :: Combination -> CombType
 combType (RoyalFlush _)         = TRoyalFlush
 combType (StraightFlush _ _)    = TStraightFlush
@@ -29,6 +34,21 @@ combType (Three _ _)            = TThree
 combType (Pairs _ _ _)          = TPairs
 combType (Pair _ _)             = TPair
 combType (High _)               = THigh
+
+combFirst :: Combination -> [Card]
+combFirst (House f _) = f 
+combFirst (Three f _) = f 
+combFirst (Pairs f _ _) = f 
+combFirst (Pair f _) = f 
+combFirst (High f) = f 
+combFirst _ = []
+
+combSecond :: Combination -> [Card]
+combSecond (House _ s) = s 
+combSecond (Three _ s) = s 
+combSecond (Pairs _ s _) = s  
+combSecond (Pair _ s) = s  
+combSecond _ = []
 
 
 instance Ord Combination where
@@ -61,7 +81,7 @@ instance Ord Combination where
   compare lhs rhs                                   = compare (combType lhs) (combType rhs)
 
 _sorted :: [Card] -> [Card]
-_sorted = reverse . sort
+_sorted = sortBy $ flip compare
 
 -- >>> compare (Flush [C Heart R08, C Heart R07, C Heart R0k, C Heart R02, C Heart R03]) (Flush [C Spade R0k, C Spade R07, C Spade R09, C Spade R02, C Spade R03])
 -- LT
@@ -87,3 +107,109 @@ cardsOf (High l)            = l
 -- [<♥3>,<♥4>,<♥5>,<♥6>,<♥7>]
 -- >>> cardsOf $ Four (rk A) $ C Heart $ rk Q
 -- [<♥Q>,<♥A>,<♠A>,<♦A>,<♣A>]
+
+-- | Return the best combination achieved by 5 cards
+cardsToComb :: [Card] -> Combination
+cardsToComb cards = case res of
+                        Just c -> c 
+                        Nothing -> High cards
+    where   scs = _sorted cards
+            res = _ctc scs
+
+_ctc :: [Card] -> Maybe Combination
+_ctc scs =  catchError (matchRoyalFlush scs) (\_ ->
+            catchError (matchStraightFlush scs) (\_ ->
+            catchError (matchFour scs) (\_ ->
+            catchError (matchHouse scs) (\_ ->
+            catchError (matchFlush scs) (\_ ->
+            catchError (matchStraight scs) (\_ ->
+            catchError (matchThree scs) (\_ ->
+            catchError (matchPairs scs) (\_ ->
+            matchPair scs))))))))
+
+matchRoyalFlush :: [Card] -> Maybe Combination
+matchRoyalFlush scs@(f:_) = do
+                                matchStraightFlush scs
+                                if rank f == R0a then
+                                    return $ RoyalFlush $ suit f 
+                                else
+                                    throwError ()
+matchRoyalFlush _ = throwError ()
+
+matchStraightFlush :: [Card] -> Maybe Combination
+matchStraightFlush scs@(f:_) = do 
+                                matchStraight scs
+                                matchFlush scs
+                                return $ StraightFlush (suit f) (rank f)
+matchStraightFlush _ = throwError ()
+
+matchStraight :: [Card] -> Maybe Combination
+matchStraight [x]       = Just $ Straight [x]
+matchStraight (x:y:xs)  | ry /= R0a && rx == succ ry    = do {rest <- matchStraight (y:xs); return  $ Straight $ x:cardsOf rest}
+                        | otherwise                     = throwError ()
+                    where   rx = rank x
+                            ry = rank y
+matchStraight []        = throwError ()
+
+matchFlush :: [Card] -> Maybe Combination
+matchFlush cs@(c:r) | all (\x -> suit x == suit c) r    = return $ Flush cs 
+                    | otherwise                         = throwError ()
+matchFlush [] = throwError ()
+
+rkArray :: [Card] -> [(Rank, Int)]
+rkArray = foldl' rAi []
+    where   rAi :: [(Rank, Int)] -> Card -> [(Rank, Int)]
+            rAi [] C{rank = r} = [(r, 1)]
+            rAi rs@((r1, cnt):xs) C{rank = r}   | r == r1   = (r1, cnt+1):xs
+                                                | otherwise = (r, 1):rs
+
+-- >>> rkArray [C Spade R08, C Heart R08, C Spade R07, C Diamond R07, C Club R07]
+-- [(<rk 7>,3),(<rk 8>,2)]
+
+matchFour :: [Card] -> Maybe Combination
+matchFour scs = case ftd of 
+                    [] -> throwError ()
+                    ((r,_):_) -> return $ Four r $ head $ filter (\x -> rank x /= r) scs
+    where   ra      = rkArray scs
+            ftd     = filter (\(_, c) -> c == 4) ra 
+
+
+-- >>> matchFour [C Heart R04, C Spade R04, C Club R04, C Diamond R04, C Spade R03]
+-- Just (Four <rk 4> <♠3>)
+
+
+matchHouse :: [Card] -> Maybe Combination
+matchHouse scs = do
+                    c3 <- matchThree scs
+                    if length ra == 2 then
+                        return $ House (combFirst c3) (combSecond c3)
+                    else 
+                        throwError ()
+    where   ra  = rkArray scs
+
+matchThree :: [Card] -> Maybe Combination
+matchThree scs = case ftd of
+                    [] -> throwError ()
+                    ((r,_):_) -> return $ Three (filter (\x -> rank x == r) scs) (filter (\x -> rank x /= r) scs)
+    where   ra  = rkArray scs
+            ftd = filter (\(_,c) -> c == 3) ra
+
+-- >>> matchHouse [C Heart R0k, C Spade R0k, C Diamond R0k, C Spade R04, C Diamond R04]
+-- Just (House [<♥K>,<♠K>,<♦K>] [<♠4>,<♦4>])
+
+matchPairs :: [Card] -> Maybe Combination
+matchPairs scs = do
+                    p1 <- matchPair scs  
+                    p2 <- matchPair $ combSecond p1 
+                    return $ Pairs (combFirst p1) (combFirst p2) $ head $ combSecond p2
+
+
+matchPair :: [Card] -> Maybe Combination
+matchPair scs = case ftd of
+                    [] -> throwError ()
+                    (r,_) : _ -> return $ Pair (filter (\x -> rank x == r) scs) (filter (\x -> rank x /= r) scs)
+    where   ra  = rkArray scs
+            ftd = filter (\(_,c) -> c == 2) ra
+
+-- >>> matchPairs [C Heart R0k, C Spade R0k, C Diamond R05, C Spade R04, C Diamond R04]
+-- Just (Pairs [<♠4>,<♦4>] [<♥K>,<♠K>] <♦5>)
