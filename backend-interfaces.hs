@@ -57,6 +57,8 @@ isNextPhaseReady :: Game -> Bool
 -- Return `True` if the game should proceed to the next phase.
 doNextPhase :: Game -> Game
 -- Return the game proceeded into the next phase. Returns an invalid game if not isNextPhaseReady
+-- !Note that doNextPhase may skip phases (directly to Endgame) when only 1 player is unfolded or each player is either folded or all-ined
+
 minimalAdd :: Game -> Player -> Int
 -- Return the minimal amount the player is required to add to make a valid move. Return value is undefined if player not in turn.
 -- A player can do Pass only if their minimalAdd is 0
