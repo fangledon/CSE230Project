@@ -86,5 +86,8 @@ allCards :: [Card]
 allCards = bdc Heart ++ bdc Spade ++ bdc Diamond ++ bdc Club
     where bdc st = [C st i | i <- [R02 .. R0a]]
 
+incRank :: Int -> Rank -> Rank
+incRank x r = toEnum $ fromEnum r + x
+
 -- >>> allCards
 -- [<♥2>,<♥3>,<♥4>,<♥5>,<♥6>,<♥7>,<♥8>,<♥9>,<♥10>,<♥J>,<♥Q>,<♥K>,<♥A>,<♠2>,<♠3>,<♠4>,<♠5>,<♠6>,<♠7>,<♠8>,<♠9>,<♠10>,<♠J>,<♠Q>,<♠K>,<♠A>,<♦2>,<♦3>,<♦4>,<♦5>,<♦6>,<♦7>,<♦8>,<♦9>,<♦10>,<♦J>,<♦Q>,<♦K>,<♦A>,<♣2>,<♣3>,<♣4>,<♣5>,<♣6>,<♣7>,<♣8>,<♣9>,<♣10>,<♣J>,<♣Q>,<♣K>,<♣A>]

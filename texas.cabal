@@ -28,7 +28,10 @@ Library
     ghc-options:        -W -fdefer-typed-holes
     exposed-modules:    Texas.Driver.Entry,
                         Texas.Backend.Interface
-    other-modules:      Texas.Backend.Card
+    other-modules:      Texas.Backend.Card,
+                        Texas.Backend.Combination,
+                        Texas.Backend.Game,
+                        Texas.Backend.Player
     build-depends:      base,
                         random,
                         random-shuffle
