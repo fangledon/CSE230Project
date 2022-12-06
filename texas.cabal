@@ -35,7 +35,7 @@ Library
                         Texas.Backend.Player
     build-depends:      base, 
                         mtl,
-                        brick,
+                        brick <= 0.73,
                         containers,
                         microlens, 
                         microlens-th, 

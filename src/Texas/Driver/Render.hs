@@ -5,7 +5,7 @@ module Texas.Driver.Render
 where
 
 import Brick.AttrMap              (attrName)
-import Brick.Types                (Widget) -- TODO: Padding(Pad)
+import Brick.Types                (Widget, Padding(Pad)) -- TODO: Padding(Pad)
 import Brick.Widgets.Border       (vBorder, border, borderWithLabel, hBorder)
 import Brick.Widgets.Border.Style 
 import Brick.Widgets.Center       (center)
