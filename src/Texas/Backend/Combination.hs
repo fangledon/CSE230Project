@@ -1,7 +1,7 @@
 {-# LANGUAGE InstanceSigs #-}
 module Texas.Backend.Combination where
 import Texas.Backend.Card 
-import Data.List (sort, sortBy, foldl')
+import Data.List (sortBy, foldl')
 import Control.Monad.Except
 
 data CombType = THigh | TPair | TPairs | TThree | TStraight | TFlush | THouse | TFour | TStraightFlush | TRoyalFlush

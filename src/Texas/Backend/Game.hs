@@ -6,7 +6,7 @@ import System.Random
 import Texas.Backend.Card
 import Texas.Backend.Player
 import Texas.Backend.Combination
-import Data.List (subsequences, sort, sortBy, foldl')
+import Data.List (subsequences, sort, sortBy)
 
 data Phase = Preflop | Flop | Turn | River | Endgame
     deriving (Enum, Bounded, Show, Eq)
@@ -107,14 +107,14 @@ isDealer G{dealerPos = dp} p = seat p == dp
 
 -- Return `True` if the game should proceed to the next phase.
 isNextPhaseReady :: Game -> Bool
-isNextPhaseReady g = ins g == Phaseshift
+isNextPhaseReady g = ins g `elem` [Phaseshift, Thru]
 
 -- | Return the game proceeded into the next phase. Returns an invalid game if not isNextPhaseReady
 -- Will skip phases directly to endgame in the case when  only 1 player is unfolded or each player is either folded or all-ined
 doNextPhase :: Game -> Game
 doNextPhase g = if isNextPhaseReady g then nextphase' g else invalid
     where nextphase' :: Game -> Game
-          nextphase' g = postDo $ if ins g == Thru then thruEndgame g else nextphase g
+          nextphase' g = postDo1 $ if ins g == Thru then thruEndgame g else nextphase g
           thruEndgame :: Game -> Game
           thruEndgame g = let npg = nextphase g in
                             if phase npg == Endgame then npg else thruEndgame npg
@@ -133,7 +133,7 @@ postDo g@G{phase = ph} = case ph of
 
 
 finishGame :: Game -> Game
-finishGame g = postDo $ (assignIncome $ assignRank $ assignBestComb g) {phase = Endgame}
+finishGame g = postDo $ (assignIncome $ assignRank $ assignBestComb g) {phase = Endgame, ins = Phaseshift}
 
 assignIncome :: Game -> Game
 assignIncome g@G{players = pl} = g {incomes = assemble $ aiimpl1 g}
@@ -158,9 +158,9 @@ aiimpl1 g@G{players = pl, bestPlayers = bp}   = case vp of
             mp  = length vp * mw
             mr  = minimum $ map (\P{seat = se} -> bp !! se) vp
             el  = filter (\P{seat = se} -> (bp !! se) == mr) vp
-            ng  = seqDeductW vp mw g 
-            seqDeductW :: [Player] -> Int -> Game -> Game 
-            seqDeductW [] _ g = g 
+            ng  = seqDeductW vp mw g
+            seqDeductW :: [Player] -> Int -> Game -> Game
+            seqDeductW [] _ g = g
             seqDeductW (p@P{wager = w}:ps) dw g = seqDeductW ps dw $ updPlayer g $ p {wager = w-dw}
             distIncome :: Int -> [Player] -> [(Int, Int)] -> [(Int, Int)]
             distIncome _ [] cur = cur
@@ -190,7 +190,7 @@ assignRank g@G{players = pl} = g {bestPlayers = nbp}
 
 
 isThruEndgame :: Game -> Bool
-isThruEndgame G{players = pl} = length (filter isFolded pl) == 1 || all (\p -> isFolded p || isAllIn p) pl
+isThruEndgame G{players = pl} = length (filter (not . isFolded) pl) == 1 || all (\p -> isFolded p || isAllIn p) pl
 
 pref2Flop :: Game -> Game
 pref2Flop g = (resetTurn $ dealPublic $ dealPublic $ dealPublic $ burnCard g) {phase = Flop, ins = Ongoing}
@@ -213,7 +213,7 @@ burnCard _                  = invalid
 -- | Return the minimal amount the player is required to add to make a valid move. Return value is undefined if player not in turn.
 -- A player can do Pass only if their minimalAdd is 0
 minimalAdd :: Game -> Player -> Int
-minimalAdd G{players = pl, lastAdd = la} p = wager (pl !! la) - wager p
+minimalAdd G{players = pl, lastAdd = la} P{wager = w, money = m} = min m $ wager (pl !! la) - w
 
 -- Return the maximal amount the player can add to make a valid move. Return value is undefined if player not in turn.
 maximalAdd :: Game -> Player -> Int
@@ -225,8 +225,34 @@ data Action = Fold | Pass | Add Int -- Adding all money is considered all-in
 
 -- Return the game proceeded after player do action. Returns an invalid game if not the player's turn or not a valid action'
 doAction :: Game -> Player -> Action -> Game
-doAction = undefined -- todo
+doAction g p act = if not (isValidAction g p act) then invalid else postDo1 $ daimpl g p act
 
+postDo1 :: Game -> Game
+postDo1 g@G{players = pl, currentPos = cp, lastAdd = la, smallBlind = smb, phase = ph, ins = st}
+        | st /= Ongoing                                     = postDo g
+        | cp == la && ph == Preflop && wager cpl == 2 * smb = postDo g 
+        | cp == la                                          = postDo g {ins = Phaseshift}
+        | isFolded cpl || isAllIn cpl                       = postDo1 g {currentPos = np}
+        | otherwise                                         = postDo g
+    where   cpl = pl !! cp
+            np  = npp g cp
+
+daimpl :: Game -> Player -> Action -> Game
+daimpl g@G{currentPos = cp, lastAdd = la, phase = ph} p Fold = if ph == Preflop && cp == la then updated {ins = Phaseshift} else updated {currentPos = np}
+    where   updated = updPlayer g p {isFolded = True}
+            np      = npp g cp
+daimpl g@G{currentPos = cp, lastAdd = la, phase = ph} _ Pass = if ph == Preflop && cp == la then g {ins = Phaseshift} else g {currentPos = np}
+    where   np  = npp g cp
+daimpl g p (Add ad)                                     | ad > minimalAdd g p = (actPlaceBet ad g) {lastAdd = seat p}
+                                                        | otherwise           = actPlaceBet ad g
+
+isValidAction :: Game -> Player -> Action -> Bool
+isValidAction g p (Add ad) = isValidPlayerForAction g p && ad >= minimalAdd g p && ad <= maximalAdd g p
+isValidAction g p Pass     = isValidAction g p $ Add 0
+isValidAction g p Fold     = isValidPlayerForAction g p
+
+isValidPlayerForAction :: Game -> Player -> Bool
+isValidPlayerForAction G{currentPos = cp, ins = st} P{seat = se} = st == Ongoing && se == cp
 
 -- | Return the income the player receives after the game.
 -- Note that a player might have income even if their combination is not the best.
