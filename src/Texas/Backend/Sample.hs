@@ -30,23 +30,7 @@ ex1Preflop = G{ players = [P { -- Alice
     isAllIn = False,
     seat = 0,
     egComb = badComb
-}, P{ -- Bob
-    hand = [C Spade R0q, C Heart R09],
-    money = 49,
-    wager = 1,
-    isFolded = False,
-    isAllIn = False,
-    seat = 1,
-    egComb = badComb
-}, P { -- Carol
-    hand = [C Spade R0k, C Heart R0j],
-    money = 48,
-    wager = 2,
-    isFolded = False,
-    isAllIn = False,
-    seat = 2,
-    egComb  = badComb
-}, P { -- Ted
+}, ex1PreflopBob, ex1PreflopCarol, P { -- Ted
     hand = [C Heart R02, C Spade R04],
     money = 50,
     wager = 0,
@@ -56,6 +40,26 @@ ex1Preflop = G{ players = [P { -- Alice
     egComb = badComb
 }], public = [], phase = Preflop,currentPos = 1, dealerPos = 0, deck = [C Heart R0a, C Club R09, C Club R0k, C Heart R03, C Spade R0a, C Spade R05, C Diamond R0a, C Diamond R09, C Diamond R03],
 incomes = [], bestPlayers = [], rng = mkStdGen 1, ins = Ongoing, smallBlind = 1, lastAdd = 2
+}
+
+ex1PreflopBob = P{ -- Bob
+    hand = [C Spade R0q, C Heart R09],
+    money = 49,
+    wager = 1,
+    isFolded = False,
+    isAllIn = False,
+    seat = 1,
+    egComb = badComb
+}
+
+ex1PreflopCarol = P { -- Carol
+    hand = [C Spade R0k, C Heart R0j],
+    money = 48,
+    wager = 2,
+    isFolded = False,
+    isAllIn = False,
+    seat = 2,
+    egComb  = badComb
 }
 
 ex1Flop = G { players = [P { -- Alice
@@ -90,7 +94,7 @@ ex1Flop = G { players = [P { -- Alice
     isAllIn = False,
     seat = 3,
     egComb = badComb
-}], public = [C Club R09, C Club R0k, C Heart R03], phase = Flop, smallBlind = 1, lastAdd = 0,
+}], public = [C Heart R03, C Club R0k, C Club R09], phase = Flop, smallBlind = 1, lastAdd = 0,
 currentPos = 2, dealerPos = 0, deck = [C Spade R0a, C Spade R05, C Diamond R0a, C Diamond R09, C Diamond R03],
 incomes = [], bestPlayers = [], rng = mkStdGen 1, ins = Ongoing
 }
@@ -127,7 +131,7 @@ ex1Turn = G {players = [P { -- Alice
     isAllIn = False,
     seat = 3,
     egComb = badComb
-}], public = [C Club R09, C Club R0k, C Heart R03, C Spade R05], currentPos = 0, dealerPos = 0, phase = Turn, lastAdd = 0,
+}], public = [C Spade R05, C Heart R03, C Club R0k, C Club R09], currentPos = 0, dealerPos = 0, phase = Turn, lastAdd = 1,
  incomes = [], bestPlayers = [], rng = mkStdGen 1, ins = Ongoing, smallBlind = 1, deck = [C Diamond R0a, C Diamond R09, C Diamond R03]
 }
 
@@ -163,7 +167,7 @@ ex1River = G { players = [P { -- Alice
     isAllIn = False,
     seat = 3,
     egComb = badComb
-}], public = [C Club R09, C Club R0k, C Heart R03, C Spade R05, C Diamond R09], phase = River,
+}], public = [C Diamond R09, C Spade R05, C Heart R03, C Club R0k, C Club R09], phase = River,
 smallBlind = 1,
 ins = Phaseshift,
 dealerPos = 0,
@@ -182,7 +186,7 @@ ex1Endgame = G{ players = [ex1Endgame_alice, P{ -- Bob
     isFolded = False,
     isAllIn = False,
     seat = 1,
-    egComb = Three [C Heart R09, C Club R09, C Diamond R09] [C Spade R0q, C Club R0k]
+    egComb = Three [C Diamond R09, C Club R09, C Heart R09] [C Club R0k, C Spade R0q]
     }, P { -- Carol
     hand = [C Spade R0k, C Heart R0j],
     money = 40,
@@ -190,15 +194,15 @@ ex1Endgame = G{ players = [ex1Endgame_alice, P{ -- Bob
     isFolded = False,
     isAllIn = False,
     seat = 2,
-    egComb = Pairs [C Spade R0k, C Club R0k] [C Club R09, C Diamond R09] $ C Heart R0j
+    egComb = Pairs [C Diamond R09, C Club R09] [C Club R0k, C Spade R0k] $ C Heart R0j
     }, ex1Endgame_ted],
-    public = [C Club R09, C Club R0k, C Heart R03, C Spade R05, C Diamond R09],
+    public = [C Diamond R09, C Spade R05, C Heart R03, C Club R0k, C Club R09],
     phase = Endgame,
     ins = Phaseshift,
     smallBlind = 1,
     dealerPos = 0,
     currentPos = 1,
-    lastAdd = 0,
+    lastAdd = 1,
     deck = [C Diamond R03],
     bestPlayers = [2, 0, 1, 2],
     incomes = [0,26,0,0],
