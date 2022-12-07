@@ -203,7 +203,7 @@ resetTurn g@G{dealerPos = dp} = g {currentPos = np, lastAdd = np}
     where np = npp g dp
 
 dealPublic :: Game -> Game
-dealPublic g@G{deck = (d:ds), public = pu}  = g {deck = ds, public = d:pu}
+dealPublic g@G{deck = (d:ds), public = pu}  = g {deck = ds, public = pu ++ [d]}
 dealPublic _                                = invalid
 
 burnCard :: Game -> Game
@@ -222,8 +222,8 @@ maximalAdd _ = money
 -- for now assume one can always all-in
 
 
-data Action = Fold | Pass | Add Int -- Adding all money is considered all-in
-    deriving (Eq, Show, Ord)
+data Action = DoFold | DoPass | DoAdd Int -- Adding all money is considered all-in
+    deriving (Eq, Show)
 
 -- Return the game proceeded after player do action. Returns an invalid game if not the player's turn or not a valid action'
 doAction :: Game -> Player -> Action -> Game
@@ -248,18 +248,18 @@ postDo2 g@G{players = pl, ins = st, currentPos = cp}
           np  = npp g cp
 
 daimpl :: Game -> Player -> Action -> Game
-daimpl g@G{currentPos = cp, lastAdd = la, phase = ph} p Fold = if ph == Preflop && cp == la then updated {ins = Phaseshift} else updated {currentPos = np}
+daimpl g@G{currentPos = cp, lastAdd = la, phase = ph} p DoFold = if ph == Preflop && cp == la then updated {ins = Phaseshift} else updated {currentPos = np}
     where   updated = updPlayer g p {isFolded = True}
             np      = npp g cp
-daimpl g@G{currentPos = cp, lastAdd = la, phase = ph} _ Pass = if ph == Preflop && cp == la then g {ins = Phaseshift} else g {currentPos = np}
+daimpl g@G{currentPos = cp, lastAdd = la, phase = ph} _ DoPass = if ph == Preflop && cp == la then g {ins = Phaseshift} else g {currentPos = np}
     where   np  = npp g cp
-daimpl g p (Add ad)                                     | ad > minimalAdd g p = (actPlaceBet ad g) {lastAdd = seat p}
+daimpl g p (DoAdd ad)                                     | ad > minimalAdd g p = (actPlaceBet ad g) {lastAdd = seat p}
                                                         | otherwise           = actPlaceBet ad g
 
 isValidAction :: Game -> Player -> Action -> Bool
-isValidAction g p (Add ad) = isValidPlayerForAction g p && ad >= minimalAdd g p && ad <= maximalAdd g p
-isValidAction g p Pass     = isValidAction g p $ Add 0
-isValidAction g p Fold     = isValidPlayerForAction g p
+isValidAction g p (DoAdd ad) = isValidPlayerForAction g p && ad >= minimalAdd g p && ad <= maximalAdd g p
+isValidAction g p DoPass     = isValidAction g p $ DoAdd 0
+isValidAction g p DoFold     = isValidPlayerForAction g p
 
 isValidPlayerForAction :: Game -> Player -> Bool
 isValidPlayerForAction G{currentPos = cp, ins = st} P{seat = se} = st == Ongoing && se == cp
@@ -287,5 +287,5 @@ isCanContinue :: Game -> Bool
 isCanContinue g@G{players = pl, smallBlind = sb} = all (\p -> money p + income g p >= 2 * sb) pl
 
 -- DISPLAY TYPES ---------------------------------------------------------------
-data Name = Act Action | AllIn | Next
+data Name = Fold | Check | Call | Raise Int | AllIn | Next
     deriving (Eq, Show, Ord)

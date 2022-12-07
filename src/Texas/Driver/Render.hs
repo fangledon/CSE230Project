@@ -4,13 +4,12 @@ module Texas.Driver.Render
 )
 where
 
-import Brick.AttrMap              (attrName, getDefaultAttr)
+import Brick.AttrMap              (attrName)
 import Brick.Types                (Widget, Padding(Pad))
-import Brick.Widgets.Border       (vBorder, border, borderWithLabel, hBorder)
+import Brick.Widgets.Border       (border, borderWithLabel, hBorder)
 import Brick.Widgets.Border.Style 
 import Brick.Widgets.Center       (center, hCenter)
 import Brick.Widgets.Core
-import Text.Printf                (printf)
 
 import Texas.Driver.GameWrapper
 import Texas.Backend.Game
@@ -38,24 +37,25 @@ emptyCards :: Int -> [Widget Name]
 emptyCards n = replicate n emptyCard
 
 displayedCard :: Card -> Widget Name               -- renders card internals
-displayedCard (C s r) = withAttr (attrName "card") -- or a card front.
+displayedCard (C s r) = withAttr (attrName color) -- or a card front.
                       $ cardStyle $ str $ show s ++ rkToStr r
+                      where color = if s == Heart || s == Diamond then "redCard" else "blackCard"
 
 drawPublicCards :: [Card] -> Widget Name
 drawPublicCards cards = hBox (publicWidgets ++ emptyCards emptyCardsLen)
   where publicWidgets = map displayedCard cards
         emptyCardsLen = 5 - length cards
 
-drawPrivateCards :: [Card] -> Widget Name
-drawPrivateCards cards = hBox (map displayedCard cards)
+drawCards :: [Card] -> Widget Name
+drawCards cards = hBox (map displayedCard cards)
 
 drawField :: GameWrapper -> Widget Name
-drawField gw = hCenter (drawPublicCards (public g)) <=> 
-              hBorder <=> 
-              hCenter (drawPrivateCards (hand currPlayer)) <=> 
-              hCenter (withAttr (attrName "bold") (str playerText)) <=> 
-              hCenter (str currentBet) <=>
-              hCenter (str playerMoney)
+drawField gw =  hCenter (drawPublicCards (public g)) <=> 
+                hBorder <=> 
+                hCenter (drawCards (hand currPlayer)) <=> 
+                hCenter (withAttr (attrName "bold") (str playerText)) <=> 
+                hCenter (str currentBet) <=>
+                hCenter (str playerMoney)
   where g = game gw
         currPlayer = players g !! currentPos g
         playerText = "Player " ++ show (currentPos g)
@@ -71,25 +71,28 @@ drawWinField gw = hCenter (drawPublicCards (public g)) <=>
 bestPlayersHand :: Game -> Widget Name
 bestPlayersHand g =  hCenter $ vBox $ map (playerBestHand g) (players g)
 
+isOnlyUnfolded :: Game -> Player -> Bool
+isOnlyUnfolded g p = not (isFolded p) && countFolded g == n - 1
+  where countFolded g = length $ filter isFolded (players g)
+        n = numPlayer g
+
 playerBestHand:: Game -> Player -> Widget Name
 playerBestHand g p =  if isBest g p then
-                    hCenter (str playerText) <=> 
-                    hCenter (drawPublicCards cards)
-                  else
-                    emptyWidget
-                  where playerText = "Player " ++ show (seat p) ++ " Wins!"
-                        cards = cardsOf (egComb p)
-
-mkActionButton :: Action -> Widget Name
-mkActionButton action = reportExtent (Act action)
-                        (padBottom (Pad 1) $ withAttr (attrName "underline") (str (show action)))
+                        hCenter (withAttr (attrName "bold") (str winText)) <=> 
+                        if isOnlyUnfolded g p then 
+                          emptyWidget
+                        else 
+                          hCenter (drawCards playerHand) <=> 
+                          hCenter (str "Best Combination") <=> 
+                          hCenter (drawCards bestComb)
+                      else
+                        emptyWidget
+                      where winText = "Player " ++ show (seat p) ++ " Wins!"
+                            bestComb = cardsOf (egComb p)
+                            playerHand = hand p
 
 mkNameButton :: Name -> Widget Name
-mkNameButton name = reportExtent name (padBottom (Pad 1) $ withAttr (attrName "underline") (str (show name)))
-
-textNumBox :: String -> Int -> Widget Name
-textNumBox s n = padBottom (Pad 1)
-                $ str s <+> withAttr (attrName "bold") (str $ show n)
+mkNameButton name = reportExtent name (padBottom (Pad 1) $ withAttr (attrName "btnStyle") (str (show name)))
 
 textBox :: String -> Widget Name
 textBox s = padBottom (Pad 1)
@@ -115,13 +118,12 @@ betsBar g = textBox "Total Bets" <=>
 
 incomesBar :: Game -> Widget Name
 incomesBar g = textBox "Incomes" <=>
-              vBox (map (playerIncomeBox g) [0..(numPlayer g - 1)]) <=>
-              withAttr (attrName "red") (str "Best Hand")
+              vBox (map (playerIncomeBox g) [0..(numPlayer g - 1)])
 
 drawUI :: GameWrapper -> [Widget Name]
 drawUI gw = [ui]
   where 
-    ui         = center $ setAvailableSize (50,80) $ lSidebar <+> board <+> rSidebar
+    ui         = center $ setAvailableSize (50,100) $ lSidebar <+> board <+> rSidebar
     title      = " Texas Hold'em "
     g          = game gw
     board      = withBorderStyle unicodeRounded $ borderWithLabel (str title) 
@@ -136,6 +138,4 @@ drawUI gw = [ui]
                     betsBar g
     rSidebar   = padAll 1
                 $ textBox "Action" <=>
-                  vBox (map mkActionButton [Fold, Pass, Add 1]) <=>
-                  mkNameButton AllIn <=>
-                  mkNameButton Next
+                  vBox (map mkNameButton [Fold, Check, Call, Raise 1, AllIn, Next])
