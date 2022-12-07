@@ -23,5 +23,3 @@ Each player will take turns to click one of the actions (Fold, Pass, Add 1, All 
 After the last round was finished, the game will decide the one or more winners with best hand to take the income in the pot. And the hand of the the winner will be shown. Then the game will proceed to next one. 
 
 <img width="318" alt="Screen Shot 2022-12-07 at 11 02 56" src="https://user-images.githubusercontent.com/30495478/206272462-dd3d35b1-d864-43ae-8f59-022517cebbef.png">
-
-# Build and Run
