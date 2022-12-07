@@ -15,24 +15,27 @@ import Brick.Types
 import Brick.Util 
 
 import Texas.Driver.Render    (drawUI)
+import Texas.Driver.GameWrapper
 import Texas.Backend.Game
 import Texas.Backend.Card
 import Texas.Backend.Player
 import Data.Data (gcast1)
+import GHC.Base (geWord)
 
 -------------------------------------------------------------------------------
-handleEvent :: Game -> BrickEvent Name Event -> EventM Name (Next Game)
+
+handleEvent :: GameWrapper -> BrickEvent Name Event -> EventM Name (Next GameWrapper)
 handleEvent g (VtyEvent e) = case e of
-    Vty.EvKey Vty.KEsc        [] -> halt s
+    Vty.EvKey Vty.KEsc        [] -> halt g
     Vty.EvMouseDown col row _ _  -> do
         extents <- map extentName <$> findClickedExtents (col, row)
         case extents of 
-            [Act Fold]      -> continue $ actionFold g
-            [Act Pass]      -> continue $ actionPass g
-            [Act (Add 2)]   -> continue $ actionAddTwo g
+            [Act Fold]      -> continue $ tryAction g Fold
+            [Act Pass]      -> continue $ tryAction g Pass
+            [Act (Add 2)]   -> continue $ tryAction g (Add 2)
             [Next]          -> continue $ doNext g
-            _               -> continue s 
-    _                            -> continue s 
+            _               -> continue g
+    _                            -> continue g 
 
 aMap :: AttrMap
 aMap = attrMap Vty.defAttr
@@ -42,7 +45,7 @@ aMap = attrMap Vty.defAttr
      ]
 
 -- App <application state> <event> <resource name>
-app :: App Game Event Name
+app :: App GameWrapper Event Name
 app = App { appDraw         = drawUI          -- s -> [Widget n]
           , appChooseCursor = showFirstCursor -- s -> [CursorLocation n] 
                                               --   -> Maybe (CursorLocation n)
@@ -58,8 +61,7 @@ client = do
         v <- Vty.mkVty =<< Vty.standardIOConfig
         Vty.setMode (Vty.outputIface v) Vty.Mouse True
         return v
-  --     customMain (IO Vty) (?BChan)(App) ( init state )
-  n <- R.newStdGen
-  --let deal = R.shuffle' initialDeal 52 n
-  void $ customMain buildVty Nothing app $ mkInitS n 
+  initVty <- buildVty
+
+  void $ customMain initVty buildVty Nothing app (newGameState 4 100 0 0)
 

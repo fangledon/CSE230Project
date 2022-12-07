@@ -5,13 +5,14 @@ module Texas.Driver.Render
 where
 
 import Brick.AttrMap              (attrName)
-import Brick.Types                (Widget, Padding(Pad)) -- TODO: Padding(Pad)
+import Brick.Types                (Widget, Padding(Pad))
 import Brick.Widgets.Border       (vBorder, border, borderWithLabel, hBorder)
 import Brick.Widgets.Border.Style 
 import Brick.Widgets.Center       (center)
 import Brick.Widgets.Core
 import Text.Printf                (printf)
 
+import Texas.Driver.GameWrapper
 import Texas.Backend.Game
 import Texas.Backend.Card
 import Texas.Backend.Player
@@ -39,14 +40,15 @@ displayedCard (C s r) = withAttr (attrName "card") -- or a card front.
 drawCards :: [Card] -> Widget Name
 drawCards cards = hBox (map displayedCard cards)
 
-drawField :: Game -> Widget Name
-drawField g = drawCards (public g) <=> 
+drawField :: GameWrapper -> Widget Name
+drawField gw = drawCards (public g) <=> 
               hBorder <=> 
               drawCards (hand currPlayer) <=> 
               textBox playerText <=> 
               textNumBox "Money: " playerMoney <=>
               textNumBox "Wager: " playerWager
-  where currPlayer = players g !! currentPos g
+  where g = game gw
+        currPlayer = players g !! currentPos g
         playerText = "Player " ++ show (currentPos g) ++ " Private Cards"
         playerMoney = money currPlayer
         playerWager = wager currPlayer
@@ -70,17 +72,17 @@ playerBetBox :: Player -> Widget Name
 playerBetBox p = padBottom (Pad 1)
                 $ str ("P" ++ show (seat p) ++ ": " ++ show (wager p)) 
 
-drawUI :: Game -> [Widget Name]
-drawUI game = [ui]
+drawUI :: GameWrapper -> [Widget Name]
+drawUI gw = [ui]
   where 
-    ui         = center $ setAvailableSize (120,29) $ lSidebar <+> board <+> rSidebar
+    ui         = center $ setAvailableSize (50,80) $ lSidebar <+> board <+> rSidebar
     title      = " Texas Hold'em "
     board      = withBorderStyle unicodeRounded
                $ borderWithLabel (str title) 
-               $ drawField game
+               $ drawField gw
     lSidebar   = padAll 1
                 $ textBox "Placed Bet" <=>
-                  vBox (map playerBetBox (players game))
+                  vBox (map playerBetBox (players $ game gw))
     rSidebar   = padAll 1
                 $ textBox "Action" <=>
                   vBox (map mkActionButton [Fold, Pass, Add 2]) <=>
