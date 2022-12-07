@@ -18,8 +18,10 @@ Press 'Esc' to exit the program. Press 'r' to reset the game.
 
 Each player will take turns to click one of the actions (Fold, Pass, Add 1, All In) on the right side to process the game. When one player has finished clicking the action, click next to switch to the next player (This will only proceeds to next player if the current action is valid)
 
-<img width="333" alt="Screen Shot 2022-12-07 at 00 07 28" src="https://user-images.githubusercontent.com/30495478/206128845-e3def53b-cdba-43a7-8c8f-58c130980248.png">
+<img width="321" alt="Screen Shot 2022-12-07 at 11 02 33" src="https://user-images.githubusercontent.com/30495478/206272410-09853f8e-094f-4d56-88c4-60a597e876d1.png">
 
 After the last round was finished, the game will decide the one or more winners with best hand to take the income in the pot. And the hand of the the winner will be shown. Then the game will proceed to next one. 
 
-<img width="336" alt="Screen Shot 2022-12-07 at 00 47 49" src="https://user-images.githubusercontent.com/30495478/206131585-011a3309-ce82-4d29-8a92-9bf66148df48.png">
+<img width="318" alt="Screen Shot 2022-12-07 at 11 02 56" src="https://user-images.githubusercontent.com/30495478/206272462-dd3d35b1-d864-43ae-8f59-022517cebbef.png">
+
+# Build and Run
