@@ -257,6 +257,7 @@ daimpl g p (DoAdd ad)                                     | ad > minimalAdd g p 
                                                         | otherwise           = actPlaceBet ad g
 
 isValidAction :: Game -> Player -> Action -> Bool
+isValidAction g p (DoAdd 0)  = False
 isValidAction g p (DoAdd ad) = isValidPlayerForAction g p && ad >= minimalAdd g p && ad <= maximalAdd g p
 isValidAction g p DoPass     = isValidAction g p $ DoAdd 0
 isValidAction g p DoFold     = isValidPlayerForAction g p
