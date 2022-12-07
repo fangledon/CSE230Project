@@ -27,3 +27,6 @@ placeBet p@P {money = m, wager = w} b = chkAllIn $ p {money = m-b, wager = w+b}
 
 -- >>> newPlayer 10 0
 -- P {hand = [], money = 10, wager = 0, isFolded = False, isAllIn = False, seat = 0, egComb = High []}
+
+-- >>> newPlayer 10 0
+-- P {hand = [], money = 10, wager = 0, isFolded = False, isAllIn = False, seat = 0, egComb = High []}

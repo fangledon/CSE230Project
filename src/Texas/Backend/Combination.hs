@@ -213,3 +213,6 @@ matchPair scs = case ftd of
 
 -- >>> matchPairs [C Heart R0k, C Spade R0k, C Diamond R05, C Spade R04, C Diamond R04]
 -- Just (Pairs [<♠4>,<♦4>] [<♥K>,<♠K>] <♦5>)
+
+-- >>> matchPairs [C Heart R0k, C Spade R0k, C Diamond R05, C Spade R04, C Diamond R04]
+-- Just (Pairs [<♠4>,<♦4>] [<♥K>,<♠K>] <♦5>)
