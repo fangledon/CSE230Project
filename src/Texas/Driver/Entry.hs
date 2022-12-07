@@ -36,7 +36,8 @@ aMap :: AttrMap
 aMap = attrMap Vty.defAttr
      [( attrName "redCard"   , fg Vty.brightRed),
       ( attrName "blackCard" , fg Vty.brightBlack),
-      ( attrName "btnStyle"  , withBackColor defAttr Vty.white), 
+      ( attrName "btnStyle1"  , withBackColor defAttr Vty.brightWhite), 
+      ( attrName "btnStyle2"  , withBackColor defAttr Vty.brightBlack), 
       ( attrName "bold"      , withStyle defAttr bold),
       ( attrName "white"     , withForeColor defAttr Vty.white),
       ( attrName "red"       , withForeColor defAttr Vty.red), 

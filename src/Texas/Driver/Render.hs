@@ -91,8 +91,9 @@ playerBestHand g p =  if isBest g p then
                             bestComb = cardsOf (egComb p)
                             playerHand = hand p
 
-mkNameButton :: Name -> Widget Name
-mkNameButton name = reportExtent name (padBottom (Pad 1) $ withAttr (attrName "btnStyle") (str (show name)))
+mkNameButton :: GameWrapper -> Name -> Widget Name
+mkNameButton gw name = reportExtent name (padBottom (Pad 1) $ withAttr (attrName style) (str (show name)))
+  where style = if tookAction gw && currName gw == name then "btnStyle2" else "btnStyle1"
 
 textBox :: String -> Widget Name
 textBox s = padBottom (Pad 1)
@@ -139,4 +140,4 @@ drawUI gw = [ui]
                     betsBar g
     rSidebar   = padAll 1
                 $ textBox "Action" <=>
-                  vBox (map mkNameButton [Fold, Check, Call, Raise 1, AllIn, Next])
+                  vBox (map (mkNameButton gw) [Fold, Check, Call, Raise 1, AllIn, Next])
