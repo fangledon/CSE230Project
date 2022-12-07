@@ -53,7 +53,7 @@ drawField :: GameWrapper -> Widget Name
 drawField gw = hCenter (drawPublicCards (public g)) <=> 
               hBorder <=> 
               hCenter (drawPrivateCards (hand currPlayer)) <=> 
-              hCenter (str playerText) <=> 
+              hCenter (withAttr (attrName "bold") (str playerText)) <=> 
               hCenter (str currentBet) <=>
               hCenter (str playerMoney)
   where g = game gw
