@@ -65,16 +65,16 @@ drawField gw = hCenter (drawPublicCards (public g)) <=>
 drawWinField :: GameWrapper -> Widget Name
 drawWinField gw = hCenter (drawPublicCards (public g)) <=> 
                   hBorder <=> 
-                  hCenter (bestPlayersHand g)
+                  bestPlayersHand g
   where g = game gw
 
 bestPlayersHand :: Game -> Widget Name
-bestPlayersHand g = vBox (map (playerBestHand g) (players g))  
+bestPlayersHand g =  hCenter $ vBox $ map (playerBestHand g) (players g)
 
 playerBestHand:: Game -> Player -> Widget Name
 playerBestHand g p =  if isBest g p then
-                    str playerText <=> 
-                    drawPublicCards cards
+                    hCenter (str playerText) <=> 
+                    hCenter (drawPublicCards cards)
                   else
                     emptyWidget
                   where playerText = "Player " ++ show (seat p) ++ " Wins!"
