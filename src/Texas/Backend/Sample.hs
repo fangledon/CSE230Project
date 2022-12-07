@@ -230,4 +230,115 @@ ex1Endgame_ted = P { -- Ted
 }
 
 -- The second set of examples contains all-in and is more complicated
--- Will figure it out later
+-- Begin: Alice is the dealer, Betty places small blind $1, Cathy places big blind $2
+--      Alice has $1000, Betty has $500, Cathy has $200, Daisy has $20
+-- Preflop: Alice deal each player 2 cards
+--      Daisy adds $10, Alice calls, Betty calls, Cathy calls
+-- Flop: Alice burn a card and deal 3 cards face up
+--      Betty adds $90, Cathy calls, Daisy all-in, Alice adds $100, Betty calls, Cathy calls
+-- Turn: Alice burn a card and deal a card face up
+--      Betty checks, Cathy All-in, Alice calls, Betty all-in, Alice Folds
+-- Directly to endgame
+
+ex2EndgameAlice = ex2TurnAlice {money = 800, wager = 200, isFolded = True}
+ex2EndgameBetty = ex2TurnBetty {money = 0, wager = 500, isAllIn = True, egComb = Straight [C Spade R08, C Spade R07, C Club R06, C Club R05, C Heart R04]}
+ex2EndgameCathy = ex2TurnCathy {money = 0, wager = 200, isAllIn = True, egComb = Straight [C Spade R08, C Spade R07, C Diamond R06, C Diamond R05, C Heart R04]}
+ex2EndgameDaisy = ex2TurnDaisy {egComb = House [C Spade R0k, C Heart R0k, C Diamond R0k] [C Heart R04, C Club R04]}
+
+ex2Endgame = ex2Turn {
+    players = [ex2EndgameAlice, ex2EndgameBetty, ex2EndgameCathy, ex2EndgameDaisy],
+    phase = Endgame,
+    ins = Phaseshift,
+    currentPos = 1,
+    lastAdd = 1,
+    public = [C Spade R07, C Spade R08, C Heart R04, C Spade R0k, C Club R04],
+    incomes = [0,570,270,80],
+    bestPlayers = [2,1,1,0],
+    deck = [C Club R0q]
+}
+
+ex2FlopAlice = ex2PreflopAlice {money = 990, wager = 10}
+
+ex2FlopBetty = ex2PreflopBetty {money = 400, wager = 100}
+
+ex2FlopCathy = ex2PreflopCathy {money = 100, wager = 100}
+
+ex2FlopDaisy = ex2PreflopDaisy {money = 0, wager = 20, isAllIn = True}
+
+ex2Flop = ex2Preflop {
+    players = [ex2FlopAlice, ex2FlopBetty, ex2FlopCathy, ex2FlopDaisy],
+    currentPos = 0,
+    lastAdd = 1,
+    public = [C Heart R04, C Spade R0k, C Club R04],
+    deck =  [C Club R0a, C Spade R08, C Club R0k, C Spade R07, C Club R0q],
+    phase = Flop
+}
+
+ex2TurnAlice = ex2FlopAlice {money = 800, wager = 200}
+ex2TurnBetty = ex2FlopBetty {money = 390, wager = 110}
+ex2TurnCathy = ex2FlopCathy {money = 0, wager = 200, isAllIn = True}
+ex2TurnDaisy = ex2FlopDaisy
+
+ex2Turn = ex2Flop {
+    players = [ex2TurnAlice, ex2TurnBetty, ex2TurnCathy, ex2TurnDaisy],
+    currentPos = 1,
+    lastAdd = 2,
+    public = [C Spade R08, C Heart R04, C Spade R0k, C Club R04],
+    deck =  [C Club R0k, C Spade R07, C Club R0q],
+    phase = Turn
+}
+
+ex2PreflopAlice = P {
+    hand = [C Spade R0a, C Spade R09],
+    money = 1000,
+    wager = 0,
+    isFolded = False,
+    isAllIn = False,
+    seat = 0,
+    egComb = High []
+}
+
+ex2PreflopBetty = P {
+    hand = [C Club R05, C Club R06],
+    money = 499,
+    wager = 1,
+    isFolded = False,
+    isAllIn = False,
+    seat = 1,
+    egComb = High []
+}
+
+ex2PreflopCathy = P {
+    hand = [C Diamond R05, C Diamond R06],
+    money = 198,
+    wager = 2,
+    isFolded = False,
+    isAllIn = False,
+    seat = 2,
+    egComb = High []
+}
+
+ex2PreflopDaisy = P {
+    hand = [C Heart R0k, C Diamond R0k],
+    money = 20,
+    wager = 0,
+    isFolded = False,
+    isAllIn = False,
+    seat = 3,
+    egComb = High []
+}
+
+ex2Preflop = G {
+    players = [ex2PreflopAlice, ex2PreflopBetty, ex2PreflopCathy, ex2PreflopDaisy],
+    public = [],
+    deck = [C Diamond R04, C Club R04, C Spade R0k, C Heart R04, C Club R0a, C Spade R08, C Club R0k, C Spade R07, C Club R0q],
+    phase = Preflop,
+    currentPos = 3,
+    lastAdd = 2,
+    dealerPos = 0,
+    smallBlind = 1,
+    ins = Ongoing,
+    bestPlayers = [],
+    incomes = [],
+    rng = mkStdGen 2
+}
