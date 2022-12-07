@@ -22,4 +22,4 @@ Each player will take turns to click one of the actions (Fold, Pass, Add 1, All 
 
 After the last round was finished, the game will decide the one or more winners with best hand to take the income in the pot. And the hand of the the winner will be shown. Then the game will proceed to next one. 
 
-<img width="323" alt="Screen Shot 2022-12-07 at 00 37 08" src="https://user-images.githubusercontent.com/30495478/206129266-3c3041ed-5c4a-471a-ad2c-c4eacf0eb627.png">
+<img width="336" alt="Screen Shot 2022-12-07 at 00 47 49" src="https://user-images.githubusercontent.com/30495478/206131585-011a3309-ce82-4d29-8a92-9bf66148df48.png">
