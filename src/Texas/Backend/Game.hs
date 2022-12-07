@@ -199,7 +199,8 @@ turnRiver :: Game -> Game
 turnRiver g = (resetTurn $ dealPublic $ burnCard g) {ins = Ongoing}
 
 resetTurn :: Game -> Game
-resetTurn g@G{dealerPos = dp} = g {currentPos = npp g dp, lastAdd = -1}
+resetTurn g@G{dealerPos = dp} = g {currentPos = np, lastAdd = np}
+    where np = npp g dp
 
 dealPublic :: Game -> Game
 dealPublic g@G{deck = (d:ds), public = pu}  = g {deck = ds, public = d:pu}
