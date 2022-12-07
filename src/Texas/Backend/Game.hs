@@ -24,7 +24,7 @@ data Game = G {
     incomes :: [Int],
     bestPlayers :: [Int],
     rng :: StdGen
-}   deriving Show
+}   deriving (Show, Eq)
 
 data GameState = Invalid | Ongoing | Phaseshift | Stuck | Thru
     deriving (Eq,Show)
@@ -114,7 +114,7 @@ isNextPhaseReady g = ins g `elem` [Phaseshift, Thru]
 doNextPhase :: Game -> Game
 doNextPhase g = if isNextPhaseReady g then nextphase' g else invalid
     where nextphase' :: Game -> Game
-          nextphase' g = postDo1 $ if ins g == Thru then thruEndgame g else nextphase g
+          nextphase' g = postDo2 $ if ins g == Thru then thruEndgame g else nextphase g
           thruEndgame :: Game -> Game
           thruEndgame g = let npg = nextphase g in
                             if phase npg == Endgame then npg else thruEndgame npg
@@ -199,7 +199,8 @@ turnRiver :: Game -> Game
 turnRiver g = (resetTurn $ dealPublic $ burnCard g) {ins = Ongoing}
 
 resetTurn :: Game -> Game
-resetTurn g@G{dealerPos = dp} = g {currentPos = npp g dp, lastAdd = -1}
+resetTurn g@G{dealerPos = dp} = g {currentPos = np, lastAdd = np}
+    where np = npp g dp
 
 dealPublic :: Game -> Game
 dealPublic g@G{deck = (d:ds), public = pu}  = g {deck = ds, public = d:pu}
@@ -237,6 +238,14 @@ postDo1 g@G{players = pl, currentPos = cp, lastAdd = la, smallBlind = smb, phase
         | otherwise                                         = postDo g
     where   cpl = pl !! cp
             np  = npp g cp
+
+postDo2 :: Game -> Game
+postDo2 g@G{players = pl, ins = st, currentPos = cp}
+        | st /= Ongoing = postDo g 
+        | isFolded cpl || isAllIn cpl = postDo2 g {currentPos = np}
+        | otherwise = postDo g 
+    where cpl = pl !! cp 
+          np  = npp g cp
 
 daimpl :: Game -> Player -> Action -> Game
 daimpl g@G{currentPos = cp, lastAdd = la, phase = ph} p Fold = if ph == Preflop && cp == la then updated {ins = Phaseshift} else updated {currentPos = np}
@@ -278,5 +287,5 @@ isCanContinue :: Game -> Bool
 isCanContinue g@G{players = pl, smallBlind = sb} = all (\p -> money p + income g p >= 2 * sb) pl
 
 -- DISPLAY TYPES ---------------------------------------------------------------
-data Name = Act Action | Next
+data Name = Act Action | AllIn | Next
     deriving (Eq, Show, Ord)

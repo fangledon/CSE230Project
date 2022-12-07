@@ -25,23 +25,30 @@ import GHC.Base (geWord)
 -------------------------------------------------------------------------------
 
 handleEvent :: GameWrapper -> BrickEvent Name Event -> EventM Name (Next GameWrapper)
-handleEvent g (VtyEvent e) = case e of
-    Vty.EvKey Vty.KEsc        [] -> halt g
+handleEvent gw (VtyEvent e) = case e of
+    Vty.EvKey Vty.KEsc        [] -> halt gw
+    Vty.EvKey (Vty.KChar 'r') [] -> continue $ doReset gw
     Vty.EvMouseDown col row _ _  -> do
         extents <- map extentName <$> findClickedExtents (col, row)
         case extents of 
-            [Act Fold]      -> continue $ tryAction g Fold
-            [Act Pass]      -> continue $ tryAction g Pass
-            [Act (Add 2)]   -> continue $ tryAction g (Add 2)
-            [Next]          -> continue $ doNext g
-            _               -> continue g
-    _                            -> continue g 
+            [Act Fold]      -> continue $ tryAction gw Fold
+            [Act Pass]      -> continue $ tryAction gw Pass
+            [Act (Add 1)]   -> continue $ tryAction gw (Add 1)
+            [AllIn]         -> continue $ tryAction gw (Add currMoney)
+            [Next]          -> continue $ doNext gw
+            _               -> continue gw
+    _                            -> continue gw 
+    where   g = game gw
+            currMoney = money (players g !! currentPos g)
 
 aMap :: AttrMap
 aMap = attrMap Vty.defAttr
      [( attrName "card"      , fg Vty.white ),
       ( attrName "underline" , withStyle defAttr underline), 
-      ( attrName "bold"      , withStyle defAttr bold)
+      ( attrName "bold"      , withStyle defAttr bold),
+      ( attrName "white"     , withForeColor defAttr Vty.white ),
+      ( attrName "red"       , withForeColor defAttr Vty.red), 
+      ( attrName "green"     , withForeColor defAttr Vty.green)
      ]
 
 -- App <application state> <event> <resource name>
@@ -63,5 +70,5 @@ client = do
         return v
   initVty <- buildVty
 
-  void $ customMain initVty buildVty Nothing app (newGameState 4 100 0 0)
+  void $ customMain initVty buildVty Nothing app (newGameState 4 100 1 999)
 
