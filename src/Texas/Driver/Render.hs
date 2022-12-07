@@ -100,9 +100,10 @@ textBox s = padBottom (Pad 1)
 
 playerBetBox :: Game -> Int -> Widget Name
 playerBetBox g i = padBottom (Pad 1)
-                $ withAttr (attrName color) (str $ "P" ++ show i ++ ": " ++ show (wager p))
+                $ withAttr (attrName color) (str $ "P" ++ show i ++ ": " ++ show (wager p) ++ maybeArrow)
                 where p = players g !! i
                       color = if isDealer g p then "green" else "white"
+                      maybeArrow = if currentPos g == i then " <" else ""
 
 playerIncomeBox :: Game -> Int -> Widget Name
 playerIncomeBox g i = padBottom (Pad 1)
