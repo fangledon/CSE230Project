@@ -27,11 +27,14 @@ extra-source-files:
 Library
     ghc-options:        -W -fdefer-typed-holes
     exposed-modules:    Texas.Driver.Entry,
-                        Texas.Backend.Interface
+                        Texas.Backend.Interface,
+                        Texas.Bot.Interface
     other-modules:      Texas.Backend.Card,
                         Texas.Backend.Combination,
                         Texas.Backend.Game,
-                        Texas.Backend.Player
+                        Texas.Backend.Player,
+                        Texas.Bot.RandomBot,
+                        Texas.Bot.CallBot
     build-depends:      base,
                         random,
                         random-shuffle,
