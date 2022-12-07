@@ -10,3 +10,16 @@ This project will implement the popular Texas Hold’em poker game with multiple
 6. Simple AI to play against (optional if time permits)
 
 Once the project is finished, the users should be able to use the program to start a fully simulated Texas Hold’em game, take turns to enter their actions, and finally win bets with their luck and strategies. 
+
+# Build and Run
+After cloning the repo and cd into the project directory, simply run 'cabal build' and 'cabal run client' to run the executable.
+
+Press 'Esc' to exit the program. Press 'r' to reset the game. 
+
+Each player will take turns to click one of the actions (Fold, Pass, Add 1, All In) on the right side to process the game. When one player has finished clicking the action, click next to switch to the next player (This will only proceeds to next player if the current action is valid)
+
+<img width="333" alt="Screen Shot 2022-12-07 at 00 07 28" src="https://user-images.githubusercontent.com/30495478/206128845-e3def53b-cdba-43a7-8c8f-58c130980248.png">
+
+After the last round was finished, the game will decide the one or more winners with best hand to take the income in the pot. And the hand of the the winner will be shown. Then the game will proceed to next one. 
+
+<img width="323" alt="Screen Shot 2022-12-07 at 00 37 08" src="https://user-images.githubusercontent.com/30495478/206129266-3c3041ed-5c4a-471a-ad2c-c4eacf0eb627.png">
