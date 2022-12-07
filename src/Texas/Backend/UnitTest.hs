@@ -193,3 +193,6 @@ unitTestEx1 = do
 
 -- >>> cardsToComb [C Spade R0k, C Heart R0q, C Club R0k, C Diamond R0q, C Heart R0k]
 -- House [<♠K>,<♣K>,<♥K>] [<♥Q>,<♦Q>]
+
+-- >>> cardsToComb [C Spade R0k, C Heart R0q, C Club R0k, C Diamond R0q, C Heart R0k]
+-- House [<♠K>,<♣K>,<♥K>] [<♥Q>,<♦Q>]

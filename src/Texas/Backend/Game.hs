@@ -285,3 +285,7 @@ canContinue g = ins g == Stuck
 
 isCanContinue :: Game -> Bool
 isCanContinue g@G{players = pl, smallBlind = sb} = all (\p -> money p + income g p >= 2 * sb) pl
+
+-- DISPLAY TYPES ---------------------------------------------------------------
+data Name = Act Action | Next
+    deriving (Eq, Show, Ord)
