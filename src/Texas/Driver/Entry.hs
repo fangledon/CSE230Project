@@ -70,5 +70,5 @@ client = do
         return v
   initVty <- buildVty
 
-  void $ customMain initVty buildVty Nothing app (newGameState 4 100 1 999)
+  void $ customMain initVty buildVty Nothing app (newGameState 4 100 1 230)
 

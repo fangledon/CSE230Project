@@ -65,11 +65,20 @@ drawField gw = hCenter (drawPublicCards (public g)) <=>
 drawWinField :: GameWrapper -> Widget Name
 drawWinField gw = hCenter (drawPublicCards (public g)) <=> 
                   hBorder <=> 
-                  hCenter (str playerText) <=> 
                   hCenter (bestPlayersHand g)
   where g = game gw
-        bestPlayer = head (bestPlayers g)
-        playerText = "Player " ++ show bestPlayer ++ " Wins!"
+
+bestPlayersHand :: Game -> Widget Name
+bestPlayersHand g = vBox (map (playerBestHand g) (players g))  
+
+playerBestHand:: Game -> Player -> Widget Name
+playerBestHand g p =  if isBest g p then
+                    str playerText <=> 
+                    drawPublicCards cards
+                  else
+                    emptyWidget
+                  where playerText = "Player " ++ show (seat p) ++ " Wins!"
+                        cards = cardsOf (egComb p)
 
 mkActionButton :: Action -> Widget Name
 mkActionButton action = reportExtent (Act action)
@@ -98,14 +107,6 @@ playerIncomeBox g i = padBottom (Pad 1)
                 where p = players g !! i
                       income = incomes g !! i
                       color = if isBest g p then "red" else "white"
-
-bestPlayersHand:: Game -> Widget Name
-bestPlayersHand g = if phase g == Endgame then
-                      drawPublicCards cards
-                    else
-                      emptyWidget
-                    where cards = cardsOf (egComb bestPlayer)
-                          bestPlayer = players g !! head (bestPlayers g)
 
 betsBar :: Game -> Widget Name
 betsBar g = textBox "Total Bets" <=>
