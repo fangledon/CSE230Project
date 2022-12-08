@@ -15,18 +15,19 @@ import Brick.Util
 import Texas.Driver.Render    (drawUI)
 import Texas.Driver.GameWrapper
 import Texas.Backend.Game
+import System.Random (getStdGen, genWord32, setStdGen)
 
 -------------------------------------------------------------------------------
 
 handleEvent :: GameWrapper -> BrickEvent Name Event -> EventM Name (Next GameWrapper)
 handleEvent gw (VtyEvent e) = case e of
     Vty.EvKey Vty.KEsc        [] -> halt gw
-    Vty.EvKey Vty.KEnter      [] -> continue $ doNext gw
-    Vty.EvKey (Vty.KChar 'r') [] -> continue $ doReset gw
+    Vty.EvKey Vty.KEnter      [] -> continue $ nextTurn $ doNext gw
+    Vty.EvKey (Vty.KChar 'r') [] -> continue $ nextTurn $ doReset gw
     Vty.EvMouseDown col row _ _  -> do
         extents <- map extentName <$> findClickedExtents (col, row)
         case extents of 
-            [Next]      -> continue $ doNext gw
+            [Next]      -> continue $ nextTurn $ doNext gw
             [action]    -> continue $ tryAction gw action
             _           -> continue gw
     _                            -> continue gw 
@@ -62,5 +63,7 @@ client = do
         Vty.setMode (Vty.outputIface v) Vty.Mouse True
         return v
   initVty <- buildVty
-  void $ customMain initVty buildVty Nothing app (newGameState 4 100 1 0)
-
+  stdgen <- getStdGen
+  let (rv, ng) = genWord32 stdgen
+  setStdGen ng
+  void $ customMain initVty buildVty Nothing app (nextTurn $ newGameState 4 100 1 $ fromIntegral rv)

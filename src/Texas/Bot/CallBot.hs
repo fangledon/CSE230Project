@@ -1,6 +1,7 @@
 {-# LANGUAGE InstanceSigs #-}
 module Texas.Bot.CallBot
 (
+    CallBot,
     mkCallBot
 ) where
 

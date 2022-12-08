@@ -65,8 +65,10 @@ drawField gw =  hCenter (drawPublicCards (public g)) <=>
 drawWinField :: GameWrapper -> Widget Name
 drawWinField gw = hCenter (drawPublicCards (public g)) <=> 
                   hBorder <=> 
-                  bestPlayersHand g
+                  bestPlayersHand g <=>
+                  resetPrompt
   where g = game gw
+        resetPrompt = if canContinue g then emptyWidget else hCenter $ withAttr (attrName "red") $ str "Press 'R' to reset"
 
 bestPlayersHand :: Game -> Widget Name
 bestPlayersHand g =  hCenter $ vBox $ map (playerBestHand g) (players g)
@@ -87,7 +89,7 @@ playerBestHand g p =  if isBest g p then
                           hCenter (drawCards bestComb)
                       else
                         emptyWidget
-                      where winText = "Player " ++ show (seat p) ++ " Wins!"
+                      where winText = "Player " ++  show (seat p) ++ " Wins!"
                             bestComb = cardsOf (egComb p)
                             playerHand = hand p
 
@@ -101,14 +103,14 @@ textBox s = padBottom (Pad 1)
 
 playerBetBox :: Game -> Int -> Widget Name
 playerBetBox g i = padBottom (Pad 1)
-                $ withAttr (attrName color) (str $ "P" ++ show i ++ ": " ++ show (wager p) ++ maybeArrow)
+                $ withAttr (attrName color) (str $ "P" ++ show i ++ ": " ++ show (wager p) ++ ": " ++ show (money p) ++ maybeArrow)
                 where p = players g !! i
                       color = if isDealer g p then "green" else "white"
                       maybeArrow = if currentPos g == i then " <" else ""
 
 playerIncomeBox :: Game -> Int -> Widget Name
 playerIncomeBox g i = padBottom (Pad 1)
-                $ withAttr (attrName color) (str $ "P" ++ show i ++ ": " ++ show income)
+                $ withAttr (attrName color) (str $ "P" ++ show i ++ ": " ++ show income ++ " => " ++ show (money p))
                 where p = players g !! i
                       income = incomes g !! i
                       color = if isBest g p then "red" else "white"
@@ -139,5 +141,5 @@ drawUI gw = [ui]
                   else 
                     betsBar g
     rSidebar   = padAll 1
-                $ textBox "Action" <=>
+                $ textBox ("Action") <=>
                   vBox (map (mkNameButton gw) [Fold, Check, Call, Raise 1, AllIn, Next])

@@ -133,7 +133,7 @@ postDo g@G{phase = ph} = case ph of
 
 
 finishGame :: Game -> Game
-finishGame g = postDo $ (assignIncome $ assignRank $ assignBestComb g) {phase = Endgame, ins = Phaseshift}
+finishGame g = (assignIncome $ assignRank $ assignBestComb g) {phase = Endgame, ins = Phaseshift}
 
 assignIncome :: Game -> Game
 assignIncome g@G{players = pl} = g {incomes = assemble $ aiimpl1 g}
@@ -257,8 +257,9 @@ daimpl g p (DoAdd ad)                                     | ad > minimalAdd g p 
                                                         | otherwise           = actPlaceBet ad g
 
 isValidAction :: Game -> Player -> Action -> Bool
+isValidAction g p (DoAdd 0)  = False
 isValidAction g p (DoAdd ad) = isValidPlayerForAction g p && ad >= minimalAdd g p && ad <= maximalAdd g p
-isValidAction g p DoPass     = isValidAction g p $ DoAdd 0
+isValidAction g p DoPass     = isValidPlayerForAction g p && minimalAdd g p == 0
 isValidAction g p DoFold     = isValidPlayerForAction g p
 
 isValidPlayerForAction :: Game -> Player -> Bool
@@ -281,7 +282,7 @@ isBest g p = (bestPlayers g !! seat p) == 0
 
 -- | Return whether everyone has enough money (>= big blind) to continue into the next round
 canContinue :: Game -> Bool
-canContinue g = ins g == Stuck
+canContinue g = ins g /= Stuck
 
 isCanContinue :: Game -> Bool
 isCanContinue g@G{players = pl, smallBlind = sb} = all (\p -> money p + income g p >= 2 * sb) pl

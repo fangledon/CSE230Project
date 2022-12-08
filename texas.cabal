@@ -29,11 +29,13 @@ Library
     exposed-modules:    Texas.Driver.Entry, 
                         Texas.Driver.Render, 
                         Texas.Driver.GameWrapper, 
-                        Texas.Backend.Interface
+                        Texas.Backend.Interface,
+                        Texas.Bot.Interface
     other-modules:      Texas.Backend.Card,
                         Texas.Backend.Combination,
                         Texas.Backend.Game,
-                        Texas.Backend.Player
+                        Texas.Backend.Player,
+                        Texas.Bot.RandomBot
     build-depends:      base, 
                         mtl,
                         brick <= 0.73,
@@ -58,7 +60,9 @@ executable client
                         Texas.Backend.Game
                         Texas.Backend.Player
                         Texas.Driver.GameWrapper
-                        Texas.Driver.Render
+                        Texas.Driver.Render,
+                        Texas.Bot.Interface,
+                        Texas.Bot.RandomBot
     ghc-options:         -threaded -rtsopts -with-rtsopts=-N
 
     -- LANGUAGE extensions used by modules in this package.
