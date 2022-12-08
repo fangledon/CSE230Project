@@ -14,8 +14,8 @@ data CallBot = CB
 
 instance Bot CallBot where
   doDecision :: CallBot -> Game -> Player -> (Action, CallBot)
-  doDecision _ g p  | mini == 0 = (Pass, CB)
-                    | otherwise = (Add mini, CB)
+  doDecision _ g p  | mini == 0 = (DoPass, CB)
+                    | otherwise = (DoAdd mini, CB)
     where   mini = minimalAdd g p
 
 

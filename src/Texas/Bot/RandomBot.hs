@@ -15,13 +15,15 @@ newtype RandomBot = RB StdGen
     deriving Show
 instance Bot RandomBot where
   doDecision :: RandomBot -> Game -> Player -> (Action, RandomBot)
-  doDecision (RB rng) g p   | rdFA == 0 = (Fold, RB rng1) -- we have a 1/10 chance of folding
-                            | rdFA == 1 = (Add maxi, RB rng1) -- another 1/10 chance of all-in
-                            | otherwise = (Add adv, rb2) -- otherwise we do the exponential add
+  doDecision (RB rng) g p   | rdFA == 0 = (DoFold, RB rng1) -- we have a 1/10 chance of folding
+                            | rdFA == 1 = (DoAdd maxi, RB rng1) -- another 1/10 chance of all-in
+                            | otherwise = (wrap $ DoAdd adv, rb2) -- otherwise we do the exponential add
     where   mini = minimalAdd g p
             maxi = maximalAdd g p
             (rdFA, rng1) = genWord32R 9 rng
             (adv, rb2) = expo (RB rng1) mini maxi
+            wrap (DoAdd 0) = DoPass
+            wrap _rest     = _rest
 
 -- We have a 1/2 chance to add the minimal amount
 -- and another 1/2 chance to increase a random amount and repeat this
